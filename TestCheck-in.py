@@ -95,7 +95,7 @@ def load_data_by_mssv(mssv):
         info_frame.pack(side=tk.RIGHT, padx=40, pady=10)
         if display_timer:
             root.after_cancel(display_timer)  # Hủy bỏ bộ đếm cũ nếu có
-        display_timer = root.after(3000, lambda: info_frame.pack_forget())
+        display_timer = root.after(5000, lambda: info_frame.pack_forget())
         
         # Cập nhật database, thêm vào danh sách đã điểm danh
         check_in_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -282,13 +282,37 @@ def play_sound(sound_file):
         print(f"Lỗi phát âm thanh: {e}")
 
 
+
+
 # Cửa sổ chính của ứng dụng
 root = tk.Tk()
 root.title("Smart Attendance Tracker")
 root.geometry("1000x800")
 
+# Tạo Frame cho hình ảnh góc dưới cùng bên phải
+bottom_right_frame = tk.Frame(root)
+bottom_right_frame.pack(side=tk.LEFT, padx=2, pady=10)
+
+# Tải và resize hình ảnh 1
+image1 = Image.open("static/huit.jpg").resize((387, 90))
+image1_tk = ImageTk.PhotoImage(image1)
+label1 = tk.Label(bottom_right_frame, image=image1_tk)
+label1.grid(row=0, column=0, columnspan=2, padx=5, pady=5) 
+
+# Tải và resize hình ảnh 2
+image2 = Image.open("static/aistar.jpg").resize((175, 175))
+image2_tk = ImageTk.PhotoImage(image2)
+label2 = tk.Label(bottom_right_frame, image=image2_tk)
+label2.grid(row=1, column=0, padx=5, pady=5)
+
+# Tải và resize hình ảnh 3
+image3 = Image.open("static/ithuit.jpg").resize((175, 175))
+image3_tk = ImageTk.PhotoImage(image3)
+label3 = tk.Label(bottom_right_frame, image=image3_tk)
+label3.grid(row=1, column=1, padx=5, pady=5)
+
 # Thay đổi biểu tượng cửa sổ
-root.iconbitmap("static\logo-byme.ico")  # Đường dẫn đến tệp .ico
+root.iconbitmap("static/logo-byme.ico")  
 
 def load_icon(image_path, size=(40, 40)):
     """Tải và điều chỉnh kích thước biểu tượng."""
@@ -300,32 +324,24 @@ def load_icon(image_path, size=(40, 40)):
 close_icon_image_tk = load_icon("static/close.png")
 icon_image_tk = load_icon("static/list.png")
 
-# Tải hình nền
-background_image_path = os.path.join("static", "background.png")  # Đường dẫn tới hình nền
-background_image = Image.open(background_image_path)
-background_image = background_image.resize((1000, 800), Image.LANCZOS)  # Đảm bảo kích thước phù hợp
-background_image_tk = ImageTk.PhotoImage(background_image)
-
-# Tạo Label với hình nền
-background_label = tk.Label(root, image=background_image_tk)
-background_label.place(relwidth=1, relheight=1)  # Đặt Label chiếm toàn bộ diện tích cửa sổ
 
 # Frame chính
-# Tiêu đề ứng dụng
-logo = tk.PhotoImage(file="static\logo-byme.png")
-title_label = tk.Label(root, font=("Arial", 16, "bold"),image=logo)
-title_label.pack()
 
 main_frame = tk.Frame(root)
 main_frame.pack(fill=tk.BOTH, expand=True, padx=100)
+
+# Tiêu đề ứng dụng
+logo = tk.PhotoImage(file="static/LogoFinal.png")
+title_label = tk.Label(main_frame, font=("Arial", 16, "bold"),image=logo)
+title_label.pack()
 
 # Phần camera
 camera_frame = tk.Frame(main_frame)
 camera_frame.pack(side=tk.LEFT, padx=5, pady=5)
 
 # Thiết lập kích thước mong muốn cho camera
-camera_width = 440  # Chiều rộng mong muốn
-camera_height = 480  # Chiều cao mong muốn
+camera_width = 540  # Chiều rộng mong muốn
+camera_height = 580  # Chiều cao mong muốn
 
 camera_label = tk.Label(camera_frame, width=camera_width, height=camera_height)
 camera_label.pack()
@@ -368,8 +384,8 @@ recognize_thread.daemon = True
 recognize_thread.start()
 
 # Hiển thị thời gian hiện tại
-label_time = tk.Label(root, font=("Arial", 16, "bold"), fg="black")
-label_time.pack()
+label_time = tk.Label(root, font=("Arial", 16, "bold"), fg="white")
+label_time.pack(side=tk.TOP)
 update_time()
 
 # Chạy vòng lặp giao diện
