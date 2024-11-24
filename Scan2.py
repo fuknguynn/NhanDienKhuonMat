@@ -1,48 +1,79 @@
 import tkinter as tk
 from tkinter import messagebox
-import os
 import cv2
+import os
 from pymongo import MongoClient
+from gtts import gTTS
+import time
+import pygame
 
-# Kết nối MongoDB (bỏ qua nếu không dùng)
+# --- Cấu hình ---
+MONGO_URI = 'mongodb://localhost:27017/'
+DATABASE_NAME = 'nhandienkhuonmat'
+COLLECTION_NAME = 'sinhvien'
+DATASET_DIR = 'dataset'
+AUDIO_DIR = 'Audio'
+
+# --- Kết nối MongoDB ---
 try:
-    client = MongoClient('mongodb://localhost:27017/')
-    db = client['nhandienkhuonmat']
-    students = db['sinhvien']
+    client = MongoClient(MONGO_URI)
+    db = client[DATABASE_NAME]
+    students = db[COLLECTION_NAME]
 except Exception as e:
-    print(f"Lỗi kết nối MongoDB: {e}")
-    messagebox.showerror("Lỗi", "Kết nối CSDL thất bại!")
+    messagebox.showerror("Lỗi", f"Kết nối CSDL thất bại! ({e})")
     exit()
 
+# --- Tạo thư mục dataset và audio ---
+os.makedirs(DATASET_DIR, exist_ok=True)
+os.makedirs(AUDIO_DIR, exist_ok=True)
 
-dataset_dir = 'dataset'
-os.makedirs(dataset_dir, exist_ok=True)
+
+# --- Hàm phát âm thanh ---
+def speak(text, filename):
+    try:
+        tts = gTTS(text=text, lang='vi')
+        filepath = os.path.join(AUDIO_DIR, f"{filename}.mp3")
+        tts.save(filepath)
+        pygame.mixer.init()
+        pygame.mixer.music.load(filepath)
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)
+        pygame.mixer.quit()
+    except Exception as e:
+        messagebox.showerror("Lỗi", f"Lỗi phát âm thanh: {e}")
 
 
+# --- Hàm reset form ---
 def reset_form():
     mssv_entry.delete(0, tk.END)
     hoten_entry.config(state="normal"); hoten_entry.delete(0, tk.END); hoten_entry.config(state="readonly")
     lop_entry.config(state="normal"); lop_entry.delete(0, tk.END); lop_entry.config(state="readonly")
 
 
+# --- Hàm kiểm tra MSSV ---
 def check_student():
     mssv = mssv_entry.get()
     if len(mssv) != 10:
         messagebox.showerror("Lỗi", "MSSV phải có 10 ký tự!"); reset_form(); return
-    student = students.find_one({"mssv": mssv})
-    if student:
-        hoten_entry.config(state="normal"); hoten_entry.delete(0, tk.END); hoten_entry.insert(0, student["hoten"]); hoten_entry.config(state="readonly")
-        lop_entry.config(state="normal"); lop_entry.delete(0, tk.END); lop_entry.insert(0, student["lop"]); lop_entry.config(state="readonly")
-    else:
-        messagebox.showerror("Lỗi", "Sinh viên không tồn tại!"); reset_form()
+    try:
+        student = students.find_one({"mssv": mssv})
+        if student:
+            hoten_entry.config(state="normal"); hoten_entry.delete(0, tk.END); hoten_entry.insert(0, student["hoten"]); hoten_entry.config(state="readonly")
+            lop_entry.config(state="normal"); lop_entry.delete(0, tk.END); lop_entry.insert(0, student["lop"]); lop_entry.config(state="readonly")
+        else:
+            messagebox.showerror("Lỗi", "Sinh viên không tồn tại!"); reset_form()
+    except Exception as e:
+        messagebox.showerror("Lỗi", f"Lỗi truy vấn CSDL: {e}")
 
 
+# --- Hàm chụp ảnh ---
 def capture_images():
     mssv = mssv_entry.get()
     if not mssv:
         messagebox.showerror("Lỗi", "Vui lòng nhập MSSV!"); return
 
-    student_images_dir = os.path.join(dataset_dir, mssv)
+    student_images_dir = os.path.join(DATASET_DIR, mssv)
     os.makedirs(student_images_dir, exist_ok=True)
 
     try:
@@ -56,6 +87,7 @@ def capture_images():
 
         total_images = 50; current_images = 0
         messagebox.showinfo("Thông báo", "Nhấn 'q' để dừng.")
+        speak("Bắt đầu chụp ảnh", "batdau")
 
         while current_images < total_images:
             ret, frame = cap.read()
@@ -71,16 +103,28 @@ def capture_images():
                 cv2.imwrite(os.path.join(student_images_dir, f'{mssv}_{current_images}.jpg'), face)
                 cv2.putText(frame, f"Saving {current_images}/{total_images}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
 
+                # Phát giọng nói cho các khoảng ảnh
+                if current_images == 10:
+                    speak("Nhìn lên", "nhinlen")
+                elif current_images == 20:
+                    speak("Nhìn xuống", "nhinxuong")
+                elif current_images == 30:
+                    speak("Nhìn trái", "nhintrai")
+                elif current_images == 40:
+                    speak("Nhìn phải", "nhinphai")
+
             cv2.imshow('Thu thập dữ liệu', frame)
             if cv2.waitKey(1) & 0xFF == ord('q'): break
 
         cap.release(); cv2.destroyAllWindows()
+        speak("Hoàn thành việc chụp ảnh", "hoanthanh")
         messagebox.showinfo("Hoàn tất", f"Đã lưu {current_images} ảnh cho {mssv}."); reset_form()
 
     except Exception as e:
         messagebox.showerror("Lỗi", f"Đã xảy ra lỗi: {e}")
 
 
+# --- Giao diện ---
 root = tk.Tk(); root.title("Thu thập dữ liệu khuôn mặt"); root.geometry("600x600")
 
 try:
