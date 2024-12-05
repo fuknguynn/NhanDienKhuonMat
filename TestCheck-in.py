@@ -16,7 +16,7 @@ import time
 
 # Kết nối tới MongoDB
 client = MongoClient('mongodb+srv://scjan123:vgbyostAaTl3Uttq@cluster0.aahzt.mongodb.net/')
-db = client['nhandienkhuonmat1']
+db = client['nhandienkhuonmat']
 students = db['sinhvien']
 events = db['sukien']
 # Load embedding vectors từ file
@@ -286,7 +286,7 @@ def play_sound(sound_file):
 
 # Cửa sổ chính của ứng dụng
 root = tk.Tk()
-root.title("Smart Attendance Tracker")
+root.title("Hệ Thống Điểm Danh Sự Kiện Bằng Khuôn Mặt")
 root.geometry("1000x800")
 
 # Tạo Frame cho hình ảnh góc dưới cùng bên phải
@@ -294,19 +294,19 @@ bottom_right_frame = tk.Frame(root)
 bottom_right_frame.pack(side=tk.LEFT, padx=2, pady=10)
 
 # Tải và resize hình ảnh 1
-image1 = Image.open("static/huit.jpg").resize((387, 90))
+image1 = Image.open("static/huit.png").resize((387, 90))
 image1_tk = ImageTk.PhotoImage(image1)
 label1 = tk.Label(bottom_right_frame, image=image1_tk)
 label1.grid(row=0, column=0, columnspan=2, padx=5, pady=5) 
 
 # Tải và resize hình ảnh 2
-image2 = Image.open("static/aistar.jpg").resize((175, 175))
+image2 = Image.open("static/aistar.png").resize((175, 175))
 image2_tk = ImageTk.PhotoImage(image2)
 label2 = tk.Label(bottom_right_frame, image=image2_tk)
 label2.grid(row=1, column=0, padx=5, pady=5)
 
 # Tải và resize hình ảnh 3
-image3 = Image.open("static/ithuit.jpg").resize((175, 175))
+image3 = Image.open("static/ithuit.png").resize((175, 175))
 image3_tk = ImageTk.PhotoImage(image3)
 label3 = tk.Label(bottom_right_frame, image=image3_tk)
 label3.grid(row=1, column=1, padx=5, pady=5)
