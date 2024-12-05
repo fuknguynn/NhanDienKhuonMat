@@ -1,14 +1,14 @@
-import tkinter as tk
-from tkinter import messagebox
+import customtkinter as ctk
 import cv2
+import tkinter as tk
 import os
 from pymongo import MongoClient
 from gtts import gTTS
 import time
 import pygame
+from tkinter import messagebox
 
 # --- Cấu hình ---
-MONGO_URI = 'mongodb://localhost:27017/'
 DATABASE_NAME = 'nhandienkhuonmat'
 COLLECTION_NAME = 'sinhvien'
 DATASET_DIR = 'dataset'
@@ -16,7 +16,7 @@ AUDIO_DIR = 'Audio'
 
 # --- Kết nối MongoDB ---
 try:
-    client = MongoClient(MONGO_URI)
+    client = MongoClient('mongodb+srv://scjan123:vgbyostAaTl3Uttq@cluster0.aahzt.mongodb.net/')
     db = client[DATABASE_NAME]
     students = db[COLLECTION_NAME]
 except Exception as e:
@@ -26,7 +26,6 @@ except Exception as e:
 # --- Tạo thư mục dataset và audio ---
 os.makedirs(DATASET_DIR, exist_ok=True)
 os.makedirs(AUDIO_DIR, exist_ok=True)
-
 
 # --- Hàm phát âm thanh ---
 def speak(text, filename):
@@ -43,13 +42,11 @@ def speak(text, filename):
     except Exception as e:
         messagebox.showerror("Lỗi", f"Lỗi phát âm thanh: {e}")
 
-
 # --- Hàm reset form ---
 def reset_form():
-    mssv_entry.delete(0, tk.END)
-    hoten_entry.config(state="normal"); hoten_entry.delete(0, tk.END); hoten_entry.config(state="readonly")
-    lop_entry.config(state="normal"); lop_entry.delete(0, tk.END); lop_entry.config(state="readonly")
-
+    mssv_entry.delete(0, ctk.END)
+    hoten_entry.configure(state="normal"); hoten_entry.delete(0, ctk.END); hoten_entry.configure(state="disabled")
+    lop_entry.configure(state="normal"); lop_entry.delete(0, ctk.END); lop_entry.configure(state="disabled")
 
 # --- Hàm kiểm tra MSSV ---
 def check_student():
@@ -59,13 +56,12 @@ def check_student():
     try:
         student = students.find_one({"mssv": mssv})
         if student:
-            hoten_entry.config(state="normal"); hoten_entry.delete(0, tk.END); hoten_entry.insert(0, student["hoten"]); hoten_entry.config(state="readonly")
-            lop_entry.config(state="normal"); lop_entry.delete(0, tk.END); lop_entry.insert(0, student["lop"]); lop_entry.config(state="readonly")
+            hoten_entry.configure(state="normal"); hoten_entry.delete(0, ctk.END); hoten_entry.insert(0, student["hoten"]); hoten_entry.configure(state="disabled")
+            lop_entry.configure(state="normal"); lop_entry.delete(0, ctk.END); lop_entry.insert(0, student["lop"]); lop_entry.configure(state="disabled")
         else:
             messagebox.showerror("Lỗi", "Sinh viên không tồn tại!"); reset_form()
     except Exception as e:
         messagebox.showerror("Lỗi", f"Lỗi truy vấn CSDL: {e}")
-
 
 # --- Hàm chụp ảnh ---
 def capture_images():
@@ -123,31 +119,46 @@ def capture_images():
     except Exception as e:
         messagebox.showerror("Lỗi", f"Đã xảy ra lỗi: {e}")
 
-
 # --- Giao diện ---
-root = tk.Tk(); root.title("Thu thập dữ liệu khuôn mặt"); root.geometry("600x600")
+ctk.set_appearance_mode("System")  # Cài đặt chế độ giao diện hệ thống (sáng/tối)
+ctk.set_default_color_theme("blue")
+
+root = ctk.CTk()
+root.title("Thu thập dữ liệu khuôn mặt")
+root.geometry("800x700")
 
 try:
-    img = tk.PhotoImage(file='static/LogoFinal.png')
+    img = tk.PhotoImage(file='static/huitBG.png')
     img_label = tk.Label(root, image=img)
     img_label.image = img
-    img_label.pack(pady=20)
+    img_label.pack(pady=40)
 except Exception as e:
     print(f"Lỗi tải ảnh: {e}")
     messagebox.showerror("Lỗi", "Không tải được ảnh!")
 
-FONT_LARGE = ("Arial", 16, "bold"); FONT_MEDIUM = ("Arial", 14)
+# --- Cấu hình font và chiều rộng ---
+FONT = ("Arial", 20)
+WIDTH = 35  # Đặt chiều rộng đồng đều cho tất cả các thành phần
 
-mssv_label = tk.Label(root, text="MSSV:", font=FONT_LARGE); mssv_label.pack(side=tk.TOP, anchor=tk.W, padx=20, pady=5)
-mssv_entry = tk.Entry(root, font=FONT_MEDIUM, width=25); mssv_entry.pack(side=tk.TOP, fill=tk.X, padx=20, pady=5)
-check_button = tk.Button(root, text="Kiểm tra", font=FONT_MEDIUM, command=check_student, bg="#BA8E23", fg="white"); check_button.pack(side=tk.TOP, padx=20, pady=5)
+mssv_label = ctk.CTkLabel(root, text="MSSV:", font=FONT)
+mssv_label.pack(side=ctk.TOP, anchor="w", padx=30, pady=15)
+mssv_entry = ctk.CTkEntry(root, font=FONT, width=WIDTH)
+mssv_entry.pack(side=ctk.TOP, fill=ctk.X, padx=30, pady=10)
 
-hoten_label = tk.Label(root, text="Họ tên:", font=FONT_MEDIUM); hoten_label.pack(side=tk.TOP, anchor=tk.W, padx=20, pady=5)
-hoten_entry = tk.Entry(root, font=FONT_MEDIUM, state="readonly", width=30); hoten_entry.pack(side=tk.TOP, fill=tk.X, padx=20, pady=5)
+check_button = ctk.CTkButton(root, text="Kiểm tra", font=FONT, command=check_student, fg_color="#BA8E23", hover_color="#9e7015", width=WIDTH * 4)
+check_button.pack(side=ctk.TOP, padx=30, pady=15)
 
-lop_label = tk.Label(root, text="Lớp:", font=FONT_MEDIUM); lop_label.pack(side=tk.TOP, anchor=tk.W, padx=20, pady=5)
-lop_entry = tk.Entry(root, font=FONT_MEDIUM, state="readonly", width=30); lop_entry.pack(side=tk.TOP, fill=tk.X, padx=20, pady=5)
+hoten_label = ctk.CTkLabel(root, text="Họ tên:", font=FONT)
+hoten_label.pack(side=ctk.TOP, anchor="w", padx=30, pady=15)
+hoten_entry = ctk.CTkEntry(root, font=FONT, state="disabled", width=WIDTH)
+hoten_entry.pack(side=ctk.TOP, fill=ctk.X, padx=30, pady=10)
 
-capture_button = tk.Button(root, text="Chụp ảnh", font=FONT_LARGE, command=capture_images, bg="#4CAF50", fg="white"); capture_button.pack(side=tk.TOP, padx=20, pady=20)
+lop_label = ctk.CTkLabel(root, text="Lớp:", font=FONT)
+lop_label.pack(side=ctk.TOP, anchor="w", padx=30, pady=15)
+lop_entry = ctk.CTkEntry(root, font=FONT, state="disabled", width=WIDTH)
+lop_entry.pack(side=ctk.TOP, fill=ctk.X, padx=30, pady=10)
+
+capture_button = ctk.CTkButton(root, text="Chụp ảnh", font=FONT, command=capture_images, fg_color="#4CAF50", hover_color="#3c8c41", width=WIDTH * 4)
+capture_button.pack(side=ctk.TOP, padx=30, pady=30)
 
 root.mainloop()

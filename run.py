@@ -77,13 +77,13 @@ def statistics_events():
     subprocess.run(["python", r"D:\DoAn\NhanDienKhuonMat\ThongKeSuKien.py"])
 
 def get_face_data():
-    subprocess.run(["python", r"D:\DoAn\NhanDienKhuonMat\Scan2.py"])
+    subprocess.run(["python", r"D:\DoAn\NhanDienKhuonMat\LayDuLieuKhuonMat.py"])
 
 def train_model():
-    subprocess.run(["python", r"D:\DoAn\NhanDienKhuonMat\facenet_train.py"])
+    subprocess.run(["python", r"D:\DoAn\NhanDienKhuonMat\HuanLuyenMoHinh.py"])
 
 def check_in():
-    subprocess.run(["python", r"D:\DoAn\NhanDienKhuonMat\TestCheck-in.py"])
+    subprocess.run(["python", r"D:\DoAn\NhanDienKhuonMat\Checkin.py"])
 
 def check_out():
     ctk.CTkMessageBox(title="Check-out", message="Chức năng này chưa được triển khai.")
