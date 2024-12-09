@@ -86,7 +86,7 @@ def check_in():
     subprocess.run(["python", r"D:\DoAn\NhanDienKhuonMat\Checkin.py"])
 
 def check_out():
-    ctk.CTkMessageBox(title="Check-out", message="Chức năng này chưa được triển khai.")
+    subprocess.run(["python", r"D:\DoAn\NhanDienKhuonMat\Checkout.py"])
 
 # --- Main GUI ---
 ctk.set_appearance_mode("System")
